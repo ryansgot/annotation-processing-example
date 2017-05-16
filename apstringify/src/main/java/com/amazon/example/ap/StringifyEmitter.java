@@ -28,8 +28,23 @@ public class StringifyEmitter {
         TypeSpec.Builder classBuilder = TypeSpec.classBuilder(ClassName.bestGuess(packageName + ".Stringifier"))
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT);
 
-        addDateFormats(classBuilder);
-        addStringifyMethods(classBuilder);
+        for (ClassSummary classSummary : classSummaries) {
+            if (!classSummary.hasNonDefaultDateFormat()) {
+                continue;
+            }
+            classBuilder.addField(FieldSpec.builder(SimpleDateFormat.class, dateFormatFieldNameOf(classSummary))
+                    .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+                    .initializer("new $T($S)", ClassName.get(SimpleDateFormat.class), classSummary.getDateFormat())
+                    .build());
+        }
+        for (ClassSummary classSummary : classSummaries) {
+            classBuilder.addMethod(MethodSpec.methodBuilder("stringify")
+                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                    .returns(String.class)
+                    .addParameter(ClassName.bestGuess(classSummary.getClassName()), "in", Modifier.FINAL)
+                    .addCode(stringBuildingCode(classSummary))
+                    .build());
+        }
 
         try {
             JavaFile.builder(packageName, classBuilder.build())
@@ -41,84 +56,51 @@ public class StringifyEmitter {
         }
     }
 
-    private void addStringifyMethods(TypeSpec.Builder classBuilder) {
-        for (ClassSummary classSummary : classSummaries) {
-            classBuilder.addMethod(MethodSpec.methodBuilder("stringify")
-                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                    .returns(String.class)
-                    .addParameter(ClassName.bestGuess(classSummary.getClassName()), "in", Modifier.FINAL)
-                    .addCode(stringBuildingCode(classSummary))
-                    .build());
+    private CodeBlock stringBuildingCode(ClassSummary classSummary) {
+        String builderVarName = "builder";
+        CodeBlock.Builder codeBuilder = CodeBlock.builder()
+                .addStatement("$T $L = new $T($S)",
+                        ClassName.get(StringBuilder.class),
+                        builderVarName,
+                        ClassName.get(StringBuilder.class),
+                        classSummary.getClassSimpleName() + "{");
+        for (Map.Entry<String, TypeMirror> entry : classSummary.getFieldNameTypeMap().entrySet()) {
+            codeBuilder.add(appendBlock(builderVarName,
+                    entry.getKey(),
+                    entry.getValue(),
+                    dateFormatFieldNameOf(classSummary)));
         }
+        return codeBuilder.addStatement("return $L.delete($N.length() - 2, $N.length()).append('}').toString()",
+                builderVarName,
+                builderVarName,
+                builderVarName).build();
     }
 
-    private void addDateFormats(TypeSpec.Builder classBuilder) {
-        for (ClassSummary classSummary : classSummaries) {
-            if (!classSummary.hasNonDefaultDateFormat()) {
-                continue;
-            }
-            classBuilder.addField(FieldSpec.builder(SimpleDateFormat.class, dateFormatFieldNameOf(classSummary))
-                    .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
-                    .initializer("new $T($S)", ClassName.get(SimpleDateFormat.class), classSummary.getDateFormat())
-                    .build());
+    private CodeBlock appendBlock(String builderVarName, String varName, TypeMirror varType, String dateFormat) {
+        if (varType.toString().equals(Date.class.getName())) {
+            return CodeBlock.builder()
+                    .addStatement("$N.append($S).append($S).append($N.format($N.$L)).append($S)",
+                            builderVarName,
+                            varName,
+                            "=",
+                            dateFormat,
+                            "in",
+                            varName,
+                            ", ").build();
         }
+        return CodeBlock.builder()
+                .addStatement("$N.append($S).append($S).append($T.valueOf($N.$L)).append($S)",
+                        builderVarName,
+                        varName,
+                        "=",
+                        ClassName.get(String.class),
+                        "in",
+                        varName,
+                        ", ").build();
     }
 
     private String dateFormatFieldNameOf(ClassSummary classSummary) {
         return Character.toLowerCase(classSummary.getClassSimpleName().charAt(0))
                 + classSummary.getClassSimpleName().substring(1) + "DateFormat";
-    }
-
-    private CodeBlock stringBuildingCode(ClassSummary classSummary) {
-        String builderVarName = "builder";
-        CodeBlock.Builder codeBuilder = CodeBlock.builder()
-                .addStatement(
-                        "$T $L = new $T($S)",
-                        ClassName.get(StringBuilder.class),
-                        builderVarName,
-                        ClassName.get(StringBuilder.class),
-                        classSummary.getClassSimpleName() + "{"
-                );
-        for (Map.Entry<String, TypeMirror> entry : classSummary.getFieldNameTypeMap().entrySet()) {
-            if (entry.getValue().toString().equals(Date.class.getName())) {
-                codeBuilder.add(dateStatement(builderVarName, entry.getKey(), dateFormatFieldNameOf(classSummary)));
-            } else {
-                codeBuilder.add(normalStatement(builderVarName, entry.getKey()));
-            }
-        }
-        return codeBuilder.addStatement(
-                "return $L.delete($N.length() - 2, $N.length()).append('}').toString()",
-                builderVarName,
-                builderVarName,
-                builderVarName
-        ).build();
-    }
-
-    private CodeBlock dateStatement(String builderVarName, String name, String dateFormatName) {
-        return CodeBlock.builder()
-                .addStatement(
-                        "$N.append($S).append($S).append($N.format($N.$L)).append($S)",
-                        builderVarName,
-                        name,
-                        "=",
-                        dateFormatName,
-                        "in",
-                        name,
-                        ", ")
-                .build();
-    }
-
-    private CodeBlock normalStatement(String builderVarName, String name) {
-        return CodeBlock.builder()
-                .addStatement(
-                        "$N.append($S).append($S).append($T.valueOf($N.$L)).append($S)",
-                        builderVarName,
-                        name,
-                        "=",
-                        ClassName.get(String.class),
-                        "in",
-                        name,
-                        ", ")
-                .build();
     }
 }
