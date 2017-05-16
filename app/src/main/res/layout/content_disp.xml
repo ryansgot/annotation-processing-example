@@ -8,37 +8,43 @@
     tools:context="com.amazon.example.apdemo.DispActivity"
     tools:showIn="@layout/activity_disp">
 
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/random_object1_text"/>
-        <View
-            android:background="@android:color/darker_gray"
+    <ScrollView
+            android:layout_alignParentTop="true"
+            android:layout_above="@+id/reset_button"
             android:layout_width="match_parent"
-            android:layout_height="1dp" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/random_object2_text" />
-        <View
-            android:background="@android:color/darker_gray"
-            android:layout_width="match_parent"
-            android:layout_height="1dp" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/random_object3_text" />
-    </LinearLayout>
+            android:layout_height="match_parent">
+        <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/random_object1_text"/>
+            <View
+                    android:background="@android:color/darker_gray"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp" />
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/random_object2_text" />
+            <View
+                    android:background="@android:color/darker_gray"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp" />
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/random_object3_text" />
+        </LinearLayout>
+    </ScrollView>
 
     <Button
-        android:text="Reset"
-        android:onClick="onResetClicked"
-        android:layout_alignParentBottom="true"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+            android:id="@id/reset_button"
+            android:text="Reset"
+            android:onClick="onResetClicked"
+            android:layout_alignParentBottom="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 </RelativeLayout>
