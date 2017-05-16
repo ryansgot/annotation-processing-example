@@ -3,14 +3,9 @@ apply plugin: 'java'
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
-    // This is not strictly necessary, however, it abstracts a lot of the tricky detials of
-    // generating code such as:
-    //  1. proper formatting/style
-    //  2. Auto-importing necessary classes and not importing classes that do not need to be imported
-    //  3. Builder interfaces for building up code
     compile 'com.squareup:javapoet:1.8.0'
 }
 
-sourceCompatibility = "1.7"
-targetCompatibility = "1.7"
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
 
