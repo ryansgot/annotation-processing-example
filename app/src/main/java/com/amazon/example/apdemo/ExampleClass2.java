@@ -10,13 +10,13 @@ import java.util.Random;
 @Stringify(dateFormat = "EEE, d MMM yyyy HH:mm:ss Z")
 public class ExampleClass2 {
 
-    /*package*/ Date aDate;
-    /*package*/ String aString;
-    /*package*/ int anInt;
-    /*package*/ long aLong;
-    /*package*/ double aDouble;
-    /*package*/ short aShort;
-    /*package*/ byte aByte;
+    Date aDate;
+    String aString;
+    int anInt;
+    long aLong;
+    double aDouble;
+    short aShort;
+    byte aByte;
 
     public ExampleClass2(Date aDate, String aString, int anInt, long aLong, double aDouble, short aShort, byte aByte) {
         this.aDate = aDate;

@@ -9,12 +9,12 @@ import java.util.Random;
 @Stringify
 public class ExampleClass3 {
 
-    /*package*/ String aString;
-    /*package*/ int anInt;
-    /*package*/ long aLong;
-    /*package*/ double aDouble;
-    /*package*/ short aShort;
-    /*package*/ byte aByte;
+    String aString;
+    int anInt;
+    long aLong;
+    double aDouble;
+    short aShort;
+    byte aByte;
 
     public ExampleClass3(String aString, int anInt, long aLong, double aDouble, short aShort, byte aByte) {
         this.aString = aString;
